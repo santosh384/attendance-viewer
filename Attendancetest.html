@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Attendance Viewer</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f8f9fa; }
+  h1 { text-align: center; }
+  #search { width: 100%; max-width: 400px; margin: 20px auto; display: block; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+  table { width: 100%; border-collapse: collapse; background: white; margin-top: 10px; }
+  th, td { padding: 8px; border: 1px solid #ddd; text-align: center; }
+  th { background-color: #007bff; color: white; }
+  tr:hover { background-color: #f1f1f1; }
+</style>
+</head>
+<body>
+  <h1>Attendance Viewer</h1>
+  <input type="text" id="search" placeholder="Search by Employee Code or Name" onkeyup="filterTable()" />
+  <div id="table-container">Loading data...</div>
+
+<script>
+  const URL = "https://script.google.com/macros/s/AKfycbxrwe-cu2pe1mOfm3RiCVKOOJI5HZ8ge6Vb3Pe0ounfdmxhVAN6GyMy9K00CoFszj4-/exec";
+
+  fetch(URL)
+    .then(res => res.json())
+    .then(data => {
+      if (!data || !data.length) {
+        document.getElementById("table-container").innerHTML = "<p>No data found</p>";
+        return;
+      }
+      // Build table header
+      let headers = Object.keys(data[0]);
+      let table = "<table><thead><tr>";
+      headers.forEach(h => { table += `<th>${h}</th>` });
+      table += "</tr></thead><tbody>";
+      // Build rows
+      data.forEach(row => {
+        table += "<tr>";
+        headers.forEach(h => {
+          table += `<td>${row[h] || ""}</td>`;
+        });
+        table += "</tr>";
+      });
+      table += "</tbody></table>";
+      document.getElementById("table-container").innerHTML = table;
+    })
+    .catch(err => {
+      document.getElementById("table-container").innerHTML = "<p>Error loading data.</p>";
+      console.error(err);
+    });
+
+  function filterTable() {
+    let filter = document.getElementById("search").value.toUpperCase();
+    let rows = document.querySelectorAll("tbody tr");
+    rows.forEach(row => {
+      let empCode = row.cells[0].textContent.toUpperCase();
+      let name = row.cells[1].textContent.toUpperCase();
+      if (empCode.includes(filter) || name.includes(filter)) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
+      }
+    });
+  }
+</script>
+</body>
+</html>
